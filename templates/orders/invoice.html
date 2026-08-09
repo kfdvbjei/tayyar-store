@@ -1,0 +1,40 @@
+{% extends 'base.html' %}{% load store_extras %}
+{% block title %}فاتورة {{ order.number }}{% endblock %}
+{% block content %}
+<div class="invoice">
+  <div class="row between" style="align-items:start">
+    <div>
+      <h2 style="margin:0">{{ STORE_NAME }}</h2>
+      <p class="small muted" style="margin:0">فاتورة ضريبية مبسطة<br>الرقم الضريبي 300000000000003</p>
+    </div>
+    <div class="small" style="text-align:end">
+      <div>رقم الفاتورة: <strong class="num">{{ order.number }}</strong></div>
+      <div>التاريخ: {{ order.created_at|date:"Y/m/d H:i" }}</div>
+      <div>الحالة: {{ order.get_status_display }}</div>
+    </div>
+  </div>
+  <hr>
+  <div class="grid g-2 small">
+    <div><strong>العميل</strong><br>{{ order.full_name }}<br>{{ order.phone }}<br>{{ order.email }}</div>
+    <div><strong>عنوان التوصيل</strong><br>{{ order.address_line }}{% if order.notes %}<br>ملاحظات: {{ order.notes }}{% endif %}</div>
+  </div>
+  <table class="data" style="margin-top:1.2rem">
+    <thead><tr><th>#</th><th>الصنف</th><th>SKU</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+    <tbody>
+      {% for item in order.items.all %}
+      <tr><td>{{ forloop.counter }}</td><td>{{ item.product_name }}</td><td>{{ item.sku }}</td>
+        <td class="num">{{ item.quantity }}</td><td class="num">{{ item.unit_price|money0 }}</td><td class="num">{{ item.line_total|money0 }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="totals" style="margin-top:1rem">
+    <div><span>المجموع قبل الضريبة</span><span class="num">{{ order.subtotal|money }}</span></div>
+    {% if order.discount %}<div><span>الخصم {{ order.coupon_code }}</span><span class="num">− {{ order.discount|money }}</span></div>{% endif %}
+    <div><span>ضريبة القيمة المضافة ({{ vat_rate }}%)</span><span class="num">{{ order.tax|money }}</span></div>
+    <div><span>الشحن</span><span class="num">{{ order.shipping_cost|money }}</span></div>
+    <div class="grand"><span>الإجمالي المستحق</span><span class="num">{{ order.total|money }}</span></div>
+  </div>
+  <p class="small muted center" style="margin-top:1.5rem">شكراً لتسوقك من {{ STORE_NAME }} · للاستفسار 8001234567</p>
+  <div class="center no-print"><button class="btn btn-ghost" onclick="window.print()"><i class="bi bi-printer"></i> طباعة</button></div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block title %}الصفحة غير موجودة — {{ STORE_NAME }}{% endblock %}
+{% block content %}<div class="wrap section center">
+  <h1>٤٠٤ — الصفحة غير موجودة</h1>
+  <p class="muted">الرابط الذي فتحته لم يعد موجوداً. ابدأ من الصفحة الرئيسية أو ابحث عن الجهاز الذي تريده.</p>
+  <a class="btn btn-volt" href="{% url 'catalog:home' %}">العودة للرئيسية</a>
+</div>{% endblock %}

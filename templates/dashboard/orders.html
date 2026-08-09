@@ -1,0 +1,35 @@
+{% extends 'dashboard/base.html' %}{% load store_extras %}
+{% block title %}الطلبات{% endblock %}
+{% block heading %}الطلبات{% endblock %}
+{% block subheading %}{{ totals.n }} طلب · إجمالي {{ totals.t|money0 }}{% endblock %}
+{% block actions %}<a class="btn btn-ghost btn-sm" href="{% url 'dashboard:export_orders' %}"><i class="bi bi-download"></i> CSV</a>{% endblock %}
+{% block content %}
+<form class="row card card-pad" style="margin-bottom:1rem;gap:.6rem">
+  <input name="q" value="{{ q }}" placeholder="رقم الطلب، اسم العميل، أو الجوال" class="grow">
+  <select name="status" style="width:auto">
+    <option value="">كل الحالات</option>
+    {% for value, label in statuses %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <button class="btn btn-ghost btn-sm">تصفية</button>
+</form>
+
+<div class="card table-wrap">
+  <table class="data">
+    <thead><tr><th>الطلب</th><th>التاريخ</th><th>العميل</th><th>المدينة</th><th>الدفع</th><th>الحالة</th><th>الإجمالي</th><th></th></tr></thead>
+    <tbody>
+    {% for o in orders %}
+    <tr>
+      <td class="num">{{ o.number }}</td>
+      <td class="nowrap small">{{ o.created_at|date:"Y/m/d H:i" }}</td>
+      <td>{{ o.full_name }}<div class="tiny muted">{{ o.phone }}</div></td>
+      <td class="small">{{ o.city }}</td>
+      <td class="small">{{ o.get_payment_method_display }}{% if o.is_paid %} <i class="bi bi-check-circle" style="color:var(--ok)"></i>{% endif %}</td>
+      <td><span class="badge {{ o.status|status_class }}">{{ o.get_status_display }}</span></td>
+      <td class="num nowrap">{{ o.total|money0 }}</td>
+      <td><a class="btn btn-ghost btn-sm" href="{% url 'dashboard:order_detail' o.number %}">فتح</a></td>
+    </tr>
+    {% empty %}<tr><td colspan="8" class="center muted" style="padding:2rem">لا توجد طلبات مطابقة.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

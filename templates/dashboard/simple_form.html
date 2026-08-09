@@ -1,0 +1,18 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block content %}
+<form method="post" class="card card-pad" style="max-width:700px">{% csrf_token %}
+  <div class="grid g-2">
+    {% for f in form %}
+    <div class="field">
+      {% if f.field.widget.input_type == 'checkbox' %}<label class="check-row">{{ f }} {{ f.label }}</label>
+      {% else %}<label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% endif %}
+      {{ f.errors }}
+    </div>
+    {% endfor %}
+  </div>
+  <button class="btn btn-volt">حفظ</button>
+  <a class="btn btn-ghost" href="javascript:history.back()">إلغاء</a>
+</form>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'dashboard/base.html' %}{% load store_extras %}
+{% block title %}المخزون{% endblock %}
+{% block heading %}أرصدة المخزون{% endblock %}
+{% block subheading %}الرصيد الحالي لكل منتج في كل مستودع{% endblock %}
+{% block actions %}
+<a class="btn btn-ghost btn-sm" href="{% url 'dashboard:export_stock' %}"><i class="bi bi-download"></i> CSV</a>
+<a class="btn btn-ghost btn-sm" href="{% url 'dashboard:stock_transfer' %}"><i class="bi bi-arrow-left-right"></i> تحويل</a>
+<a class="btn btn-volt btn-sm" href="{% url 'dashboard:stock_move' %}"><i class="bi bi-plus-slash-minus"></i> حركة مخزون</a>
+{% endblock %}
+{% block content %}
+<form class="row card card-pad" style="margin-bottom:1rem;gap:.6rem">
+  <input name="q" value="{{ q }}" placeholder="اسم المنتج أو SKU" class="grow">
+  <select name="warehouse" style="width:auto">
+    <option value="">كل المستودعات</option>
+    {% for w in warehouses %}<option value="{{ w.code }}" {% if request.GET.warehouse == w.code %}selected{% endif %}>{{ w.name }}</option>{% endfor %}
+  </select>
+  <label class="check-row small"><input type="checkbox" name="low" value="1" {% if request.GET.low == '1' %}checked{% endif %}> تحت حد الطلب فقط</label>
+  <button class="btn btn-ghost btn-sm">تصفية</button>
+</form>
+
+<div class="card table-wrap">
+  <table class="data">
+    <thead><tr><th>المنتج</th><th>المستودع</th><th>الرف</th><th>الكمية</th><th>محجوز</th><th>المتاح</th><th>حد الطلب</th><th>الحالة</th></tr></thead>
+    <tbody>
+    {% for s in records %}
+    <tr>
+      <td><strong class="small">{{ s.product.name|truncatechars:34 }}</strong><div class="tiny muted">{{ s.product.sku }}</div></td>
+      <td class="small">{{ s.warehouse.name }}</td>
+      <td class="small muted">{{ s.shelf|default:"—" }}</td>
+      <td class="num">{{ s.quantity }}</td>
+      <td class="num muted">{{ s.reserved }}</td>
+      <td class="num"><strong>{{ s.available }}</strong></td>
+      <td class="num muted">{{ s.reorder_level }}</td>
+      <td>
+        {% if s.available <= 0 %}<span class="badge bad">نفد</span>
+        {% elif s.needs_reorder %}<span class="badge warn">أعد الطلب</span>
+        {% else %}<span class="badge ok">جيد</span>{% endif %}
+      </td>
+    </tr>
+    {% empty %}<tr><td colspan="8" class="center muted" style="padding:2rem">لا توجد أرصدة. سجّل حركة إدخال أو استلم أمر شراء.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

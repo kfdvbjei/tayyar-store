@@ -1,0 +1,82 @@
+{% extends 'base.html' %}{% load store_extras %}
+{% block title %}سلة التسوق — {{ STORE_NAME }}{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <h1>سلة التسوق</h1>
+  {% if cart and cart.items.exists %}
+  <div class="grid" style="grid-template-columns:1.6fr .9fr;align-items:start">
+    <div class="card table-wrap">
+      <table class="data">
+        <thead><tr><th>المنتج</th><th>السعر</th><th>الكمية</th><th>الإجمالي</th><th></th></tr></thead>
+        <tbody>
+        {% for item in cart.items.all %}
+        <tr>
+          <td>
+            <div class="row" style="gap:.7rem;flex-wrap:nowrap">
+              {% if item.product.main_image %}<img src="{{ item.product.main_image }}" width="56" height="56" style="object-fit:contain;background:#f7f9fc;border-radius:6px" alt="">{% endif %}
+              <div>
+                <a href="{{ item.product.get_absolute_url }}"><strong>{{ item.product.name }}</strong></a>
+                <div class="tiny muted">{{ item.product.brand }} · {{ item.product.sku }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="num nowrap">{{ item.product.price|money0 }}</td>
+          <td>
+            <form action="{% url 'orders:cart_update' item.id %}" method="post" class="row" style="gap:.3rem;flex-wrap:nowrap">{% csrf_token %}
+              <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" style="width:70px" aria-label="الكمية">
+              <button class="btn btn-ghost btn-sm">تحديث</button>
+            </form>
+          </td>
+          <td class="num nowrap"><strong>{{ item.line_total|money0 }}</strong></td>
+          <td>
+            <form action="{% url 'orders:cart_remove' item.id %}" method="post">{% csrf_token %}
+              <button class="btn btn-ghost btn-sm" title="إزالة"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <aside class="card card-pad">
+      <h3>ملخص الطلب</h3>
+      <div class="totals" style="width:100%">
+        <div><span>المجموع</span><span class="num">{{ cart.subtotal|money }}</span></div>
+        {% if cart.coupon %}<div><span>خصم {{ cart.coupon.code }}</span><span class="num" style="color:var(--ok)">− {{ cart.discount|money }}</span></div>{% endif %}
+        <div><span>ضريبة القيمة المضافة</span><span class="num">{{ cart.tax|money }}</span></div>
+        <div><span>الشحن</span><span class="num">{% if cart.shipping %}{{ cart.shipping|money }}{% else %}مجاني{% endif %}</span></div>
+        <div class="grand"><span>الإجمالي</span><span class="num">{{ cart.total|money }}</span></div>
+      </div>
+
+      {% if cart.amount_to_free_shipping > 0 %}
+      <p class="small muted" style="margin-top:.6rem"><i class="bi bi-truck"></i> أضف بقيمة {{ cart.amount_to_free_shipping|money0 }} ليصبح الشحن مجانياً.</p>
+      {% endif %}
+
+      <a class="btn btn-volt btn-block" style="margin-top:.8rem" href="{% url 'orders:checkout' %}">إتمام الشراء</a>
+      <a class="btn btn-ghost btn-block" style="margin-top:.4rem" href="{% url 'catalog:products' %}">متابعة التسوق</a>
+
+      <hr>
+      {% if cart.coupon %}
+      <form action="{% url 'orders:remove_coupon' %}" method="post">{% csrf_token %}
+        <button class="btn btn-ghost btn-sm btn-block">إزالة الكوبون {{ cart.coupon.code }}</button>
+      </form>
+      {% else %}
+      <form action="{% url 'orders:apply_coupon' %}" method="post" class="row" style="gap:.4rem;flex-wrap:nowrap">{% csrf_token %}
+        <input name="code" placeholder="رمز الكوبون" aria-label="رمز الكوبون">
+        <button class="btn btn-ghost btn-sm">تطبيق</button>
+      </form>
+      {% endif %}
+    </aside>
+  </div>
+  {% else %}
+  <div class="card empty">
+    <i class="bi bi-bag"></i>
+    <h3>سلتك فارغة</h3>
+    <p>ابدأ باختيار جهاز من الأقسام.</p>
+    <a class="btn btn-volt" href="{% url 'catalog:products' %}">تصفّح المنتجات</a>
+  </div>
+  {% endif %}
+</div>
+<style>@media(max-width:860px){.wrap .grid[style*="1.6fr"]{grid-template-columns:1fr}}</style>
+{% endblock %}

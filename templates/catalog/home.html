@@ -1,0 +1,106 @@
+{% extends 'base.html' %}{% load store_extras %}
+{% block content %}
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow"><i class="bi bi-patch-check"></i> وكلاء معتمدون · ضمان الوكيل</span>
+      <h1>أجهزة بيتك، مختارة على أساس استهلاك الكهرباء لا على أساس الشكل فقط</h1>
+      <p>كل جهاز في {{ STORE_NAME }} معروض مع تصنيف كفاءة طاقته وقدرته بالواط، لتعرف تكلفة تشغيله قبل أن تشتريه. تركيب في اليوم التالي داخل المدن الرئيسية.</p>
+      <div class="row" style="margin-top:1.4rem">
+        <a class="btn btn-volt" href="{% url 'catalog:products' %}"><i class="bi bi-grid"></i> تصفّح المنتجات</a>
+        <a class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.3)" href="{% url 'catalog:products' %}?on_sale=1">عروض هذا الأسبوع</a>
+      </div>
+      <div class="hero-facts">
+        <div><strong>+{{ featured|length }}٠٠</strong><span>منتج من ٤٠ علامة</span></div>
+        <div><strong>٢٤ شهراً</strong><span>ضمان يمتد على أغلب الأجهزة</span></div>
+        <div><strong>٠ ريال</strong><span>شحن فوق {{ FREE_SHIPPING_THRESHOLD|floatformat:0 }} ريال</span></div>
+      </div>
+    </div>
+
+    <aside class="hero-panel">
+      <h3><i class="bi bi-lightning-charge-fill" style="color:var(--volt)"></i> ماذا يعني تصنيف الطاقة؟</h3>
+      <div class="energy-scale" style="margin:.8rem 0">
+        <span class="energy e-a3 on">A+++ · الأقل استهلاكاً</span>
+        <span class="energy e-a2 on">A++</span>
+        <span class="energy e-a1 on">A+</span>
+        <span class="energy e-a">A</span>
+        <span class="energy e-b">B</span>
+        <span class="energy e-c">C</span>
+        <span class="energy e-d">D · الأعلى استهلاكاً</span>
+      </div>
+      <div class="row-item"><span>ثلاجة A+++ مقابل B</span><strong style="color:var(--volt)">توفير ~٤٥٪</strong></div>
+      <div class="row-item"><span>مكيّف إنفرتر مقابل عادي</span><strong style="color:var(--volt)">توفير ~٣٠٪</strong></div>
+      <div class="row-item"><span>غسالة A++ مقابل A</span><strong style="color:var(--volt)">توفير ~١٥٪</strong></div>
+      <a class="btn btn-volt btn-sm btn-block" style="margin-top:.8rem" href="{% url 'catalog:products' %}?energy=A%2B%2B%2B&energy=A%2B%2B">اعرض الأجهزة الموفّرة</a>
+    </aside>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="trust">
+      <div><i class="bi bi-shield-check"></i><div><strong>ضمان الوكيل</strong><span>فاتورة معتمدة مع كل جهاز</span></div></div>
+      <div><i class="bi bi-tools"></i><div><strong>تركيب احترافي</strong><span>فنيون معتمدون للمكيفات والغسالات</span></div></div>
+      <div><i class="bi bi-arrow-counterclockwise"></i><div><strong>استرجاع خلال ١٤ يوماً</strong><span>بشرط سلامة التغليف</span></div></div>
+      <div><i class="bi bi-lock"></i><div><strong>دفع آمن</strong><span>مدى، فيزا، آبل باي، أو عند الاستلام</span></div></div>
+    </div>
+  </div>
+</section>
+
+{% if categories %}
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head"><div><h2>تسوّق حسب القسم</h2><p>من الأجهزة الكبيرة إلى أدوات المطبخ الصغيرة</p></div></div>
+    <div class="grid g-4">
+      {% for c in categories %}
+      <a class="cat-tile" href="{{ c.get_absolute_url }}"><i class="bi {{ c.icon }}"></i><span>{{ c.name }}</span></a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if deals %}
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head">
+      <div><h2>تخفيضات جارية</h2><p>أسعار محدودة الكمية</p></div>
+      <a href="{% url 'catalog:products' %}?on_sale=1">كل العروض <i class="bi bi-arrow-left"></i></a>
+    </div>
+    <div class="grid g-4">{% for p in deals %}{% include 'partials/product_card.html' %}{% endfor %}</div>
+  </div>
+</section>
+{% endif %}
+
+{% if featured %}
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head"><div><h2>اختيارات الفريق</h2><p>أجهزة نرشّحها بعد مقارنة الاستهلاك والضمان والسعر</p></div></div>
+    <div class="grid g-4">{% for p in featured %}{% include 'partials/product_card.html' %}{% endfor %}</div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="promo-strip">
+      <div>
+        <h2 style="color:#fff;margin:0">تجهيز شقة كاملة؟</h2>
+        <p style="margin:.2rem 0 0;color:#b9c6d6">اطلب عرض سعر لباقة الأجهزة، ونتكفّل بالتركيب والتنسيق في يوم واحد.</p>
+      </div>
+      <a class="btn btn-volt" href="{% url 'catalog:contact' %}">اطلب عرض سعر</a>
+    </div>
+  </div>
+</section>
+
+{% if newest %}
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head"><div><h2>وصل حديثاً</h2><p>أحدث الموديلات في المستودع</p></div>
+      <a href="{% url 'catalog:products' %}?sort=newest">اعرض الكل <i class="bi bi-arrow-left"></i></a></div>
+    <div class="grid g-4">{% for p in newest %}{% include 'partials/product_card.html' %}{% endfor %}</div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

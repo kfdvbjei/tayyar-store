@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="wrap auth-shell" style="max-width:600px">
+  <div class="card card-pad">
+    <h1 style="font-size:1.3rem">{{ title }}</h1>
+    <form method="post">{% csrf_token %}
+      {% for f in form %}
+      <div class="field">
+        {% if f.name == 'is_default' %}<label class="check-row">{{ f }} {{ f.label }}</label>
+        {% else %}<label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% endif %}{{ f.errors }}
+      </div>
+      {% endfor %}
+      <button class="btn btn-volt">حفظ</button>
+      <a class="btn btn-ghost" href="{% url 'accounts:addresses' %}">إلغاء</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}{% load store_extras %}
+{% block title %}مقارنة الأجهزة — {{ STORE_NAME }}{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <h1>مقارنة الأجهزة</h1>
+  {% if products %}
+  <div class="card table-wrap">
+    <table class="data">
+      <tr><th>المنتج</th>{% for p in products %}<th><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></th>{% endfor %}</tr>
+      <tr><td>السعر</td>{% for p in products %}<td class="num">{{ p.price|money0 }}</td>{% endfor %}</tr>
+      <tr><td>العلامة</td>{% for p in products %}<td>{{ p.brand }}</td>{% endfor %}</tr>
+      <tr><td>كفاءة الطاقة</td>{% for p in products %}<td><span class="energy {{ p.energy_rating|energy_class }}">{{ p.energy_rating }}</span></td>{% endfor %}</tr>
+      <tr><td>القدرة</td>{% for p in products %}<td>{{ p.power_watt|default:"—" }} واط</td>{% endfor %}</tr>
+      <tr><td>السعة</td>{% for p in products %}<td>{{ p.capacity|default:"—" }}</td>{% endfor %}</tr>
+      <tr><td>الضمان</td>{% for p in products %}<td>{{ p.warranty_months }} شهر</td>{% endfor %}</tr>
+      <tr><td>التوفر</td>{% for p in products %}<td>{% if p.in_stock %}<span class="badge ok">متوفر</span>{% else %}<span class="badge bad">نفد</span>{% endif %}</td>{% endfor %}</tr>
+    </table>
+  </div>
+  {% else %}
+  <div class="card empty"><i class="bi bi-sliders"></i><h3>لم تختر أجهزة للمقارنة</h3>
+    <p>افتح صفحة أي جهاز واضغط «أضف للمقارنة».</p>
+    <a class="btn btn-volt" href="{% url 'catalog:products' %}">تصفّح المنتجات</a></div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}حركات المخزون{% endblock %}
+{% block heading %}سجل حركات المخزون{% endblock %}
+{% block subheading %}كل دخول وخروج، مع المرجع والمستخدم{% endblock %}
+{% block content %}
+<form class="row card card-pad" style="margin-bottom:1rem;gap:.6rem">
+  <select name="kind" style="width:auto">
+    <option value="">كل الأنواع</option>
+    {% for value, label in kinds %}<option value="{{ value }}" {% if request.GET.kind == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <button class="btn btn-ghost btn-sm">تصفية</button>
+</form>
+<div class="card table-wrap">
+  <table class="data">
+    <thead><tr><th>التاريخ</th><th>المنتج</th><th>المستودع</th><th>الحركة</th><th>الكمية</th><th>المرجع</th><th>بواسطة</th></tr></thead>
+    <tbody>
+    {% for m in movements %}
+    <tr>
+      <td class="small nowrap">{{ m.created_at|date:"Y/m/d H:i" }}</td>
+      <td class="small">{{ m.product.name|truncatechars:30 }}</td>
+      <td class="small">{{ m.warehouse.name }}</td>
+      <td><span class="badge {% if m.signed_quantity > 0 %}ok{% else %}bad{% endif %}">{{ m.get_kind_display }}</span></td>
+      <td class="num">{{ m.signed_quantity }}</td>
+      <td class="small muted">{{ m.reference|default:"—" }}</td>
+      <td class="small muted">{{ m.created_by|default:"النظام" }}</td>
+    </tr>
+    {% empty %}<tr><td colspan="7" class="center muted" style="padding:2rem">لا توجد حركات مسجّلة.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

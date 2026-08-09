@@ -1,0 +1,34 @@
+<footer class="foot">
+  <div class="wrap">
+    <div class="grid g-4">
+      <div>
+        <h4>{{ STORE_NAME }}</h4>
+        <p>{{ STORE_TAGLINE }}. نبيع الأجهزة الكهربائية المنزلية من وكلاء معتمدين، ونركّبها لك في اليوم التالي.</p>
+        <div class="pay-icons"><i class="bi bi-credit-card-2-front"></i><i class="bi bi-apple"></i><i class="bi bi-cash-coin"></i><i class="bi bi-bank"></i></div>
+      </div>
+      <div>
+        <h4>تسوّق</h4>
+        {% for c in nav_categories %}<a href="{{ c.get_absolute_url }}">{{ c.name }}</a>{% endfor %}
+        <a href="{% url 'catalog:products' %}?on_sale=1">العروض</a>
+      </div>
+      <div>
+        <h4>حسابي</h4>
+        <a href="{% url 'accounts:orders' %}">طلباتي</a>
+        <a href="{% url 'accounts:addresses' %}">عناويني</a>
+        <a href="{% url 'accounts:wishlist' %}">قائمة الرغبات</a>
+        <a href="{% url 'orders:cart' %}">سلة التسوق</a>
+      </div>
+      <div>
+        <h4>خدمة العملاء</h4>
+        <a href="{% url 'catalog:contact' %}">تواصل معنا</a>
+        <a href="{% url 'catalog:about' %}">من نحن</a>
+        <a href="#">سياسة الاستبدال والاسترجاع</a>
+        <a href="#">الضمان والتركيب</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© {% now "Y" %} {{ STORE_NAME }}. جميع الحقوق محفوظة.</span>
+      <span>الرقم الضريبي 300000000000003 · الأسعار شاملة ضريبة القيمة المضافة</span>
+    </div>
+  </div>
+</footer>

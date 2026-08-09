@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}قائمة الرغبات{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <h1>قائمة الرغبات</h1>
+  {% if products %}
+  <div class="grid g-4">{% for p in products %}{% include 'partials/product_card.html' %}{% endfor %}</div>
+  {% else %}
+  <div class="card empty"><i class="bi bi-heart"></i><h3>القائمة فارغة</h3>
+    <p>اضغط أيقونة القلب في صفحة أي جهاز لحفظه هنا.</p>
+    <a class="btn btn-volt" href="{% url 'catalog:products' %}">تصفّح المنتجات</a></div>
+  {% endif %}
+</div>
+{% endblock %}

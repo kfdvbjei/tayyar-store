@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}حساب جديد — {{ STORE_NAME }}{% endblock %}
+{% block content %}
+<div class="wrap auth-shell" style="max-width:560px">
+  <div class="card card-pad">
+    <h1 style="font-size:1.4rem">إنشاء حساب</h1>
+    <p class="muted small">دقيقة واحدة، وتتابع بعدها طلباتك وضماناتك من مكان واحد.</p>
+    <form method="post">{% csrf_token %}
+      {% for f in form %}
+      <div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}
+        {% if f.help_text %}<span class="helptext">{{ f.help_text|safe }}</span>{% endif %}{{ f.errors }}</div>
+      {% endfor %}
+      <button class="btn btn-volt btn-block">إنشاء الحساب</button>
+    </form>
+    <p class="small center" style="margin-top:.8rem">لديك حساب؟ <a href="{% url 'accounts:login' %}">سجّل الدخول</a></p>
+  </div>
+</div>
+{% endblock %}

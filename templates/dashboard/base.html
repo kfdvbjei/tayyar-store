@@ -1,0 +1,55 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}لوحة التحكم{% endblock %} — {{ STORE_NAME }}</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+<div class="dash">
+  <aside class="side">
+    <a class="logo" href="{% url 'catalog:home' %}">
+      <span class="bolt"><i class="bi bi-lightning-charge-fill"></i></span>
+      <span>{{ STORE_NAME }}<small>لوحة التحكم</small></span>
+    </a>
+    {% url 'dashboard:overview' as u_home %}
+    <a href="{{ u_home }}" class="{% if request.path == u_home %}on{% endif %}"><i class="bi bi-speedometer2"></i> نظرة عامة</a>
+
+    <h5>المبيعات</h5>
+    <a href="{% url 'dashboard:orders' %}" class="{% if '/manage/orders' in request.path %}on{% endif %}"><i class="bi bi-receipt"></i> الطلبات</a>
+    <a href="{% url 'dashboard:reports' %}" class="{% if '/reports' in request.path %}on{% endif %}"><i class="bi bi-graph-up"></i> التقارير</a>
+
+    <h5>الكتالوج</h5>
+    <a href="{% url 'dashboard:products' %}" class="{% if '/manage/products' in request.path %}on{% endif %}"><i class="bi bi-box-seam"></i> المنتجات</a>
+
+    <h5>المخزون</h5>
+    <a href="{% url 'dashboard:inventory' %}" class="{% if request.path == '/manage/inventory/' %}on{% endif %}"><i class="bi bi-clipboard-data"></i> الأرصدة</a>
+    <a href="{% url 'dashboard:movements' %}" class="{% if '/movements' in request.path %}on{% endif %}"><i class="bi bi-arrow-left-right"></i> الحركات</a>
+    <a href="{% url 'dashboard:warehouses' %}" class="{% if '/warehouses' in request.path %}on{% endif %}"><i class="bi bi-building"></i> المستودعات</a>
+
+    <h5>المشتريات</h5>
+    <a href="{% url 'dashboard:purchases' %}" class="{% if '/manage/purchases' in request.path %}on{% endif %}"><i class="bi bi-cart-plus"></i> أوامر الشراء</a>
+    <a href="{% url 'dashboard:suppliers' %}" class="{% if '/suppliers' in request.path %}on{% endif %}"><i class="bi bi-truck"></i> الموردون</a>
+
+    <h5>أخرى</h5>
+    <a href="/secure-admin/"><i class="bi bi-gear"></i> إدارة Django</a>
+    <a href="{% url 'catalog:home' %}"><i class="bi bi-shop"></i> عرض المتجر</a>
+  </aside>
+
+  <main class="dash-main">
+    {% include 'partials/messages.html' %}
+    <div class="dash-head">
+      <div><h1 style="font-size:1.35rem;margin:0">{% block heading %}{% endblock %}</h1>
+        <p class="small muted" style="margin:0">{% block subheading %}{% endblock %}</p></div>
+      <div>{% block actions %}{% endblock %}</div>
+    </div>
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

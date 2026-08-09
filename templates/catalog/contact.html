@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}تواصل معنا — {{ STORE_NAME }}{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <div class="grid g-2">
+    <div>
+      <h1>تواصل معنا</h1>
+      <p class="muted">اسأل عن جهاز، أو اطلب عرض سعر لباقة تجهيز كاملة.</p>
+      <form method="post" class="card card-pad">{% csrf_token %}
+        <div class="field"><label for="name">الاسم</label><input id="name" name="name" required></div>
+        <div class="field"><label for="email">البريد الإلكتروني</label><input id="email" type="email" name="email" required></div>
+        <div class="field"><label for="phone">الجوال</label><input id="phone" name="phone"></div>
+        <div class="field"><label for="msg">رسالتك</label><textarea id="msg" name="message" rows="5" required></textarea></div>
+        <button class="btn btn-volt">أرسل الرسالة</button>
+      </form>
+    </div>
+    <div class="card card-pad" style="height:fit-content">
+      <h3>قنوات أخرى</h3>
+      <p><i class="bi bi-headset"></i> الهاتف الموحّد: 8001234567</p>
+      <p><i class="bi bi-whatsapp"></i> واتساب: 0500000000</p>
+      <p><i class="bi bi-envelope"></i> care@tayyar.sa</p>
+      <p><i class="bi bi-clock"></i> السبت–الخميس، ٩ صباحاً – ٩ مساءً</p>
+      <hr>
+      <h3>المعرض الرئيسي</h3>
+      <p class="muted">طريق الملك عبدالعزيز، الرياض</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

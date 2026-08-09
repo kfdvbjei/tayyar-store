@@ -1,0 +1,43 @@
+{% extends 'base.html' %}{% load store_extras %}
+{% block title %}حسابي — {{ STORE_NAME }}{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <h1>حسابي</h1>
+  <div class="grid g-2" style="align-items:start">
+    <div class="card">
+      <div class="card-head"><h3>البيانات الشخصية</h3></div>
+      <form method="post" class="card-pad">{% csrf_token %}
+        {% for f in form %}
+        <div class="field">
+          {% if f.name == 'newsletter' %}<label class="check-row">{{ f }} {{ f.label }}</label>
+          {% else %}<label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% endif %}
+          {{ f.errors }}
+        </div>
+        {% endfor %}
+        <button class="btn btn-volt">حفظ التعديلات</button>
+        <a class="btn btn-ghost" href="{% url 'accounts:password_change' %}">تغيير كلمة المرور</a>
+      </form>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="card-head"><h3>آخر الطلبات</h3><a class="small" href="{% url 'accounts:orders' %}">كل الطلبات</a></div>
+        <table class="data">
+          {% for o in orders %}
+          <tr>
+            <td><a href="{% url 'accounts:order_detail' o.number %}" class="num">{{ o.number }}</a><div class="tiny muted">{{ o.created_at|date:"Y/m/d" }}</div></td>
+            <td><span class="badge {{ o.status|status_class }}">{{ o.get_status_display }}</span></td>
+            <td class="num">{{ o.total|money0 }}</td>
+          </tr>
+          {% empty %}<tr><td class="muted center">لا توجد طلبات بعد.</td></tr>{% endfor %}
+        </table>
+      </div>
+      <div class="card card-pad">
+        <h3>روابط سريعة</h3>
+        <a class="btn btn-ghost btn-block" href="{% url 'accounts:addresses' %}"><i class="bi bi-geo-alt"></i> عناويني</a>
+        <a class="btn btn-ghost btn-block" style="margin-top:.4rem" href="{% url 'accounts:wishlist' %}"><i class="bi bi-heart"></i> قائمة الرغبات</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

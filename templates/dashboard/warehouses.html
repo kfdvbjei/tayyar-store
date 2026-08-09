@@ -1,0 +1,21 @@
+{% extends 'dashboard/base.html' %}{% load store_extras %}
+{% block title %}المستودعات{% endblock %}
+{% block heading %}المستودعات{% endblock %}
+{% block actions %}<a class="btn btn-volt btn-sm" href="{% url 'dashboard:warehouse_create' %}"><i class="bi bi-plus"></i> مستودع جديد</a>{% endblock %}
+{% block content %}
+<div class="grid g-3">
+  {% for w in warehouses %}
+  <div class="card card-pad">
+    <div class="row between"><h3 style="margin:0">{{ w.name }}</h3>{% if w.is_default %}<span class="badge ok">افتراضي</span>{% endif %}</div>
+    <p class="small muted">{{ w.code }}{% if w.city %} · {{ w.city }}{% endif %}<br>{{ w.address|default:"" }}</p>
+    <div class="row between small"><span>القطع</span><strong class="num">{{ w.total_units }}</strong></div>
+    <div class="row between small"><span>قيمة المخزون</span><strong class="num">{{ w.stock_value|money0 }}</strong></div>
+    <a class="btn btn-ghost btn-sm btn-block" style="margin-top:.6rem" href="{% url 'dashboard:warehouse_edit' w.pk %}">تعديل</a>
+  </div>
+  {% empty %}
+  <div class="card empty" style="grid-column:1/-1"><i class="bi bi-building"></i><h3>لا توجد مستودعات</h3>
+    <p>أنشئ مستودعاً واحداً على الأقل قبل استلام البضاعة.</p>
+    <a class="btn btn-volt" href="{% url 'dashboard:warehouse_create' %}">مستودع جديد</a></div>
+  {% endfor %}
+</div>
+{% endblock %}

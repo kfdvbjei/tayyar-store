@@ -1,0 +1,36 @@
+{% load store_extras %}
+<article class="p-card">
+  <a class="p-media" href="{{ p.get_absolute_url }}">
+    {% if p.main_image %}<img src="{{ p.main_image }}" alt="{{ p.name }}" loading="lazy">
+    {% else %}<i class="bi bi-plug ph"></i>{% endif %}
+    <div class="p-flags">
+      {% if p.has_discount %}<span class="tag tag-sale">خصم {{ p.discount_percent }}%</span>{% endif %}
+      {% if not p.in_stock %}<span class="tag tag-out">نفدت الكمية</span>{% endif %}
+      <span class="energy {{ p.energy_rating|energy_class }}">{{ p.energy_rating }}</span>
+    </div>
+  </a>
+  <div class="p-body">
+    <span class="p-brand">{{ p.brand.name }}</span>
+    <a class="p-name" href="{{ p.get_absolute_url }}">{{ p.name }}</a>
+    <div class="p-spec">
+      {% if p.capacity %}<span><i class="bi bi-box"></i> {{ p.capacity }}</span>{% endif %}
+      {% if p.power_watt %}<span><i class="bi bi-lightning"></i> {{ p.power_watt }} واط</span>{% endif %}
+      <span><i class="bi bi-shield-check"></i> ضمان {{ p.warranty_months }} شهر</span>
+    </div>
+    <div class="p-price">
+      <span class="now num">{{ p.price|money0 }}</span>
+      {% if p.has_discount %}<span class="was num">{{ p.compare_at_price|money0 }}</span>{% endif %}
+    </div>
+    <div class="p-actions">
+      {% if p.in_stock %}
+      <form action="{% url 'orders:cart_add' p.id %}" method="post" class="grow">{% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button class="btn btn-volt btn-sm btn-block"><i class="bi bi-bag-plus"></i> أضف للسلة</button>
+      </form>
+      {% else %}
+      <button class="btn btn-ghost btn-sm btn-block" disabled>غير متوفر</button>
+      {% endif %}
+      <a class="btn btn-ghost btn-sm" href="{{ p.get_absolute_url }}" title="التفاصيل"><i class="bi bi-arrow-left"></i></a>
+    </div>
+  </div>
+</article>

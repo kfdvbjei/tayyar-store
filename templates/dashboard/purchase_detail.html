@@ -1,0 +1,45 @@
+{% extends 'dashboard/base.html' %}{% load store_extras %}
+{% block title %}{{ order.number }}{% endblock %}
+{% block heading %}أمر الشراء {{ order.number }}{% endblock %}
+{% block subheading %}{{ order.supplier }} · {{ order.order_date|date:"Y/m/d" }}{% endblock %}
+{% block actions %}
+{% if order.can_receive %}
+<form method="post" action="{% url 'dashboard:purchase_receive' order.pk %}" style="display:inline">{% csrf_token %}
+  <button class="btn btn-volt btn-sm"><i class="bi bi-box-arrow-in-down"></i> استلام البضاعة</button>
+</form>
+<a class="btn btn-ghost btn-sm" href="{% url 'dashboard:purchase_edit' order.pk %}">تعديل</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="grid" style="grid-template-columns:1.6fr 1fr;align-items:start">
+  <section class="card">
+    <div class="card-head"><h3>الأصناف</h3><span class="badge {{ order.status|status_class }}">{{ order.get_status_display }}</span></div>
+    <div class="table-wrap"><table class="data">
+      <thead><tr><th>المنتج</th><th>الكمية</th><th>تكلفة الوحدة</th><th>الإجمالي</th></tr></thead>
+      {% for i in order.items.all %}
+      <tr><td>{{ i.product }}</td><td class="num">{{ i.quantity }}</td>
+        <td class="num">{{ i.unit_cost|money0 }}</td><td class="num">{{ i.line_total|money0 }}</td></tr>
+      {% endfor %}
+    </table></div>
+    <div class="card-pad"><div class="totals">
+      <div><span>المجموع</span><span class="num">{{ order.subtotal|money }}</span></div>
+      <div><span>الضريبة</span><span class="num">{{ order.tax_amount|money }}</span></div>
+      <div><span>الشحن</span><span class="num">{{ order.shipping_cost|money }}</span></div>
+      <div class="grand"><span>الإجمالي</span><span class="num">{{ order.total|money }}</span></div>
+    </div></div>
+  </section>
+
+  <aside class="card card-pad">
+    <h3>التفاصيل</h3>
+    <table class="spec-table">
+      <tr><td>المورّد</td><td>{{ order.supplier }}</td></tr>
+      <tr><td>المستودع</td><td>{{ order.warehouse }}</td></tr>
+      <tr><td>التوريد المتوقع</td><td>{{ order.expected_date|default:"—" }}</td></tr>
+      <tr><td>فاتورة المورّد</td><td>{{ order.invoice_number|default:"—" }}</td></tr>
+      <tr><td>الاستلام</td><td>{{ order.received_at|date:"Y/m/d H:i"|default:"لم يُستلم" }}</td></tr>
+      <tr><td>أنشأه</td><td>{{ order.created_by|default:"—" }}</td></tr>
+    </table>
+    {% if order.notes %}<p class="small muted">{{ order.notes }}</p>{% endif %}
+  </aside>
+</div>
+{% endblock %}

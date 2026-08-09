@@ -1,0 +1,41 @@
+{% extends 'dashboard/base.html' %}{% load store_extras %}
+{% block title %}المنتجات{% endblock %}
+{% block heading %}المنتجات{% endblock %}
+{% block subheading %}إدارة الكتالوج والأسعار والعرض{% endblock %}
+{% block actions %}<a class="btn btn-volt btn-sm" href="{% url 'dashboard:product_create' %}"><i class="bi bi-plus"></i> منتج جديد</a>{% endblock %}
+{% block content %}
+<form class="row card card-pad" style="margin-bottom:1rem;gap:.6rem">
+  <input name="q" value="{{ q }}" placeholder="اسم المنتج أو SKU" class="grow">
+  <select name="category" style="width:auto">
+    <option value="">كل الأقسام</option>
+    {% for c in categories %}<option value="{{ c.slug }}" {% if request.GET.category == c.slug %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <button class="btn btn-ghost btn-sm">تصفية</button>
+</form>
+
+<div class="card table-wrap">
+  <table class="data">
+    <thead><tr><th>المنتج</th><th>SKU</th><th>القسم</th><th>السعر</th><th>التكلفة</th><th>الهامش</th><th>المخزون</th><th>الحالة</th><th></th></tr></thead>
+    <tbody>
+    {% for p in products %}
+    <tr>
+      <td><strong class="small">{{ p.name|truncatechars:36 }}</strong><div class="tiny muted">{{ p.brand }}</div></td>
+      <td class="small">{{ p.sku }}</td>
+      <td class="small">{{ p.category }}</td>
+      <td class="num nowrap">{{ p.price|money0 }}</td>
+      <td class="num nowrap muted">{{ p.cost_price|money0 }}</td>
+      <td class="num">{% if p.profit_margin %}{{ p.profit_margin }}%{% else %}—{% endif %}</td>
+      <td class="num">
+        {% if p.stock_total %}{{ p.stock_total }}{% else %}<span class="badge bad">0</span>{% endif %}
+      </td>
+      <td>{% if p.is_active %}<span class="badge ok">معروض</span>{% else %}<span class="badge muted">مخفي</span>{% endif %}</td>
+      <td class="nowrap">
+        <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:product_edit' p.pk %}">تعديل</a>
+        <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:product_toggle' p.pk %}">{% if p.is_active %}إخفاء{% else %}عرض{% endif %}</a>
+      </td>
+    </tr>
+    {% empty %}<tr><td colspan="9" class="center muted" style="padding:2rem">لا توجد منتجات. <a href="{% url 'dashboard:product_create' %}">أضف أول منتج</a></td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

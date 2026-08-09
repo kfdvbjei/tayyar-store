@@ -1,0 +1,15 @@
+{% extends 'base.html' %}{% load store_extras %}
+{% block title %}لم يكتمل الدفع{% endblock %}
+{% block content %}
+<div class="wrap section" style="max-width:620px">
+  <div class="card card-pad center">
+    <div style="font-size:2.6rem;color:var(--warn)"><i class="bi bi-exclamation-triangle"></i></div>
+    <h1>لم يكتمل الدفع</h1>
+    <p class="muted">الطلب {{ order.number }} محفوظ بحالة «بانتظار الدفع». يمكنك إعادة المحاولة أو اختيار الدفع عند الاستلام.</p>
+    <div class="row" style="justify-content:center;gap:.5rem">
+      <a class="btn btn-volt" href="{% url 'catalog:contact' %}">تواصل مع الدعم</a>
+      <a class="btn btn-ghost" href="{% url 'catalog:products' %}">العودة للمتجر</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

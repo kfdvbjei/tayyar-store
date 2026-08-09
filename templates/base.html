@@ -1,0 +1,69 @@
+{% load static store_extras %}<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ STORE_NAME }} — {{ STORE_TAGLINE }}{% endblock %}</title>
+<meta name="description" content="{% block meta_description %}{{ STORE_TAGLINE }}. ثلاجات، غسالات، مكيفات وأجهزة مطبخ بضمان معتمد وتركيب في اليوم التالي.{% endblock %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+{% block head %}{% endblock %}
+</head>
+<body>
+
+{% block chrome %}
+<div class="topbar">
+  <div class="wrap">
+    <span><i class="bi bi-truck"></i> شحن مجاني للطلبات فوق {{ FREE_SHIPPING_THRESHOLD|floatformat:0 }} {{ CURRENCY_SYMBOL }}</span>
+    <span class="row" style="gap:1rem">
+      <a href="tel:8001234567"><i class="bi bi-headset"></i> 8001234567</a>
+      <a href="{% url 'catalog:about' %}">من نحن</a>
+      <a href="{% url 'catalog:contact' %}">تواصل معنا</a>
+    </span>
+  </div>
+</div>
+{% include 'partials/navbar.html' %}
+{% endblock %}
+
+{% include 'partials/messages.html' %}
+
+<main>{% block content %}{% endblock %}</main>
+
+{% block footer %}{% include 'partials/footer.html' %}{% endblock %}
+
+<script>
+// بحث فوري مع اقتراحات
+(function () {
+  const input = document.getElementById('q');
+  const box = document.getElementById('suggest');
+  if (!input || !box) return;
+  let timer;
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 2) { box.innerHTML = ''; box.classList.add('hide'); return; }
+    timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`{% url 'catalog:search_suggest' %}?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        if (!data.results.length) { box.classList.add('hide'); return; }
+        box.innerHTML = data.results.map(r => `
+          <a href="${r.url}">
+            ${r.image ? `<img src="${r.image}" alt="">` : '<i class="bi bi-plug" style="width:38px;text-align:center"></i>'}
+            <span class="grow">${r.name}</span><strong class="small">${r.price}</strong>
+          </a>`).join('');
+        box.classList.remove('hide');
+      } catch (e) { box.classList.add('hide'); }
+    }, 220);
+  });
+  document.addEventListener('click', e => { if (!box.contains(e.target) && e.target !== input) box.classList.add('hide'); });
+})();
+// إخفاء الرسائل تلقائياً
+setTimeout(() => document.querySelectorAll('.msg').forEach(m => m.remove()), 6000);
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}تسجيل الدخول — {{ STORE_NAME }}{% endblock %}
+{% block content %}
+<div class="wrap auth-shell">
+  <div class="card card-pad">
+    <h1 style="font-size:1.4rem">تسجيل الدخول</h1>
+    <p class="muted small">ادخل بحسابك لمتابعة طلباتك وحفظ عناوينك.</p>
+    <form method="post">{% csrf_token %}
+      {% if form.non_field_errors %}<div class="badge bad" style="display:block;margin-bottom:.6rem">{{ form.non_field_errors.0 }}</div>{% endif %}
+      {% for f in form %}
+      <div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>
+      {% endfor %}
+      <button class="btn btn-volt btn-block">دخول</button>
+    </form>
+    <div class="row between small" style="margin-top:.8rem">
+      <a href="{% url 'accounts:password_reset' %}">نسيت كلمة المرور؟</a>
+      <a href="{% url 'accounts:register' %}">إنشاء حساب جديد</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

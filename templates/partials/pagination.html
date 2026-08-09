@@ -1,0 +1,10 @@
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination" aria-label="تنقّل بين الصفحات">
+  {% if page_obj.has_previous %}<a href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">السابق</a>{% endif %}
+  {% for n in page_obj.paginator.page_range %}
+    {% if n == page_obj.number %}<span class="active">{{ n }}</span>
+    {% elif n > page_obj.number|add:-3 and n < page_obj.number|add:3 %}<a href="?{{ querystring }}&page={{ n }}">{{ n }}</a>{% endif %}
+  {% endfor %}
+  {% if page_obj.has_next %}<a href="?{{ querystring }}&page={{ page_obj.next_page_number }}">التالي</a>{% endif %}
+</nav>
+{% endif %}

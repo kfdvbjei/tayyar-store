@@ -1,0 +1,64 @@
+{% extends 'base.html' %}{% load store_extras widget_tweaks %}
+{% block title %}إتمام الشراء — {{ STORE_NAME }}{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <h1>إتمام الشراء</h1>
+  <form method="post" class="grid" style="grid-template-columns:1.5fr 1fr;align-items:start">{% csrf_token %}
+    <div class="stack">
+      <section class="card">
+        <div class="card-head"><h3>بيانات التوصيل</h3></div>
+        <div class="card-pad">
+          {% if form.non_field_errors %}<div class="badge bad">{{ form.non_field_errors }}</div>{% endif %}
+          <div class="grid g-2">
+            {% for f in form %}{% if f.name != 'payment_method' and f.name != 'save_address' and f.name != 'notes' %}
+            <div class="field">
+              <label for="{{ f.id_for_label }}">{{ f.label }}</label>
+              {{ f }}
+              {{ f.errors }}
+            </div>
+            {% endif %}{% endfor %}
+          </div>
+          <div class="field"><label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>{{ form.notes }}</div>
+          {% if user.is_authenticated %}
+          <label class="check-row small">{{ form.save_address }} {{ form.save_address.label }}</label>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h3>طريقة الدفع</h3></div>
+        <div class="card-pad radio-cards">
+          {% for radio in form.payment_method %}
+            <label>{{ radio.tag }} <span>{{ radio.choice_label }}</span></label>
+          {% endfor %}
+          {{ form.payment_method.errors }}
+          {% if not stripe_ready %}
+          <p class="small muted"><i class="bi bi-info-circle"></i> بوابة البطاقات غير مفعّلة على هذه النسخة — أضف مفاتيح Stripe في ملف <code>.env</code> لتفعيلها.</p>
+          {% endif %}
+          <p class="small muted"><i class="bi bi-shield-lock"></i> بيانات بطاقتك تُدخل على صفحة البنك مباشرة، ولا تمر عبر خوادمنا.</p>
+        </div>
+      </section>
+    </div>
+
+    <aside class="card card-pad">
+      <h3>ملخص الطلب</h3>
+      {% for item in cart.items.all %}
+      <div class="row between small" style="padding:.3rem 0;border-bottom:1px dashed var(--line)">
+        <span>{{ item.product.name|truncatechars:34 }} × {{ item.quantity }}</span>
+        <span class="num nowrap">{{ item.line_total|money0 }}</span>
+      </div>
+      {% endfor %}
+      <div class="totals" style="width:100%;margin-top:.6rem">
+        <div><span>المجموع</span><span class="num">{{ cart.subtotal|money }}</span></div>
+        {% if cart.discount %}<div><span>الخصم</span><span class="num" style="color:var(--ok)">− {{ cart.discount|money }}</span></div>{% endif %}
+        <div><span>الضريبة</span><span class="num">{{ cart.tax|money }}</span></div>
+        <div><span>الشحن</span><span class="num">{% if cart.shipping %}{{ cart.shipping|money }}{% else %}مجاني{% endif %}</span></div>
+        <div class="grand"><span>الإجمالي</span><span class="num">{{ cart.total|money }}</span></div>
+      </div>
+      <button class="btn btn-volt btn-block" style="margin-top:1rem"><i class="bi bi-lock"></i> تأكيد الطلب والدفع</button>
+      <a class="btn btn-ghost btn-block" style="margin-top:.4rem" href="{% url 'orders:cart' %}">رجوع للسلة</a>
+    </aside>
+  </form>
+</div>
+<style>@media(max-width:860px){form.grid{grid-template-columns:1fr!important}}</style>
+{% endblock %}

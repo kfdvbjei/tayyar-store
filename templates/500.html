@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block title %}خطأ في الخادم{% endblock %}
+{% block content %}<div class="wrap section center">
+  <h1>حدث خطأ غير متوقع</h1>
+  <p class="muted">سجّلنا المشكلة ونعمل على إصلاحها. أعد المحاولة بعد قليل.</p>
+  <a class="btn btn-volt" href="{% url 'catalog:home' %}">الصفحة الرئيسية</a>
+</div>{% endblock %}

@@ -1,0 +1,39 @@
+{% load store_extras %}
+<header class="nav">
+  <div class="wrap">
+    <a class="logo" href="{% url 'catalog:home' %}">
+      <span class="bolt"><i class="bi bi-lightning-charge-fill"></i></span>
+      <span>{{ STORE_NAME }}<small>أجهزة كهربائية بضمان معتمد</small></span>
+    </a>
+
+    <form class="search" action="{% url 'catalog:products' %}" method="get" role="search" autocomplete="off">
+      <input type="search" id="q" name="q" value="{{ q|default:'' }}" placeholder="ابحث عن ثلاجة، غسالة، مكيف، رمز منتج…" aria-label="البحث في المنتجات">
+      <button type="submit">بحث</button>
+      <div class="suggest hide" id="suggest"></div>
+    </form>
+
+    <nav class="nav-actions">
+      {% if user.is_authenticated %}
+        {% if user.is_staff %}<a class="nav-btn" href="{% url 'dashboard:overview' %}"><i class="bi bi-speedometer2"></i><span class="d-none">اللوحة</span></a>{% endif %}
+        <a class="nav-btn" href="{% url 'accounts:wishlist' %}"><i class="bi bi-heart"></i></a>
+        <a class="nav-btn" href="{% url 'accounts:profile' %}"><i class="bi bi-person-circle"></i> {{ user.display_name }}</a>
+        <form action="{% url 'accounts:logout' %}" method="post" style="display:inline">{% csrf_token %}
+          <button class="nav-btn" style="background:none;border:0;color:#e8edf4;cursor:pointer" title="تسجيل الخروج"><i class="bi bi-box-arrow-right"></i></button>
+        </form>
+      {% else %}
+        <a class="nav-btn" href="{% url 'accounts:login' %}"><i class="bi bi-person"></i> دخول</a>
+      {% endif %}
+      <a class="nav-btn" href="{% url 'orders:cart' %}">
+        <i class="bi bi-bag"></i> <span class="pill-count">{{ cart_count }}</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<div class="catbar">
+  <div class="wrap">
+    <a href="{% url 'catalog:products' %}"><i class="bi bi-grid"></i> كل المنتجات</a>
+    {% for c in nav_categories %}<a href="{{ c.get_absolute_url }}"><i class="bi {{ c.icon }}"></i> {{ c.name }}</a>{% endfor %}
+    <a href="{% url 'catalog:products' %}?on_sale=1" style="color:var(--volt)"><i class="bi bi-tag"></i> العروض</a>
+  </div>
+</div>

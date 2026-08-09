@@ -1,0 +1,77 @@
+{% extends 'dashboard/base.html' %}{% load store_extras %}
+{% block title %}التقارير{% endblock %}
+{% block heading %}التقارير{% endblock %}
+{% block subheading %}من {{ start|date:"Y/m/d" }} إلى {{ end|date:"Y/m/d" }}{% endblock %}
+{% block actions %}
+<form class="row" style="gap:.4rem">
+  <select name="days" onchange="this.form.submit()" style="width:auto">
+    <option value="30" {% if days == '30' %}selected{% endif %}>آخر ٣٠ يوماً</option>
+    <option value="90" {% if days == '90' %}selected{% endif %}>آخر ٩٠ يوماً</option>
+    <option value="365" {% if days == '365' %}selected{% endif %}>آخر سنة</option>
+  </select>
+</form>
+{% endblock %}
+{% block content %}
+<div class="kpis">
+  <div class="kpi"><div class="label">الإيرادات</div><div class="value num">{{ revenue|money0 }}</div></div>
+  <div class="kpi"><div class="label">تكلفة البضاعة المباعة</div><div class="value num">{{ cost|money0 }}</div></div>
+  <div class="kpi"><div class="label">مجمل الربح</div><div class="value num">{{ gross_profit|money0 }}</div>
+    <div class="delta up">هامش {{ margin }}%</div></div>
+  <div class="kpi"><div class="label">المشتريات المستلمة</div><div class="value num">{{ purchases_total|money0 }}</div></div>
+</div>
+
+<div class="grid" style="grid-template-columns:1fr 1fr;margin-top:1.2rem;align-items:start">
+  <section class="card">
+    <div class="card-head"><h3>الأداء الشهري</h3></div>
+    <table class="data">
+      <thead><tr><th>الشهر</th><th>الطلبات</th><th>الإيراد</th><th>متوسط الطلب</th></tr></thead>
+      {% for m in monthly %}
+      <tr><td>{{ m.m|date:"Y/m" }}</td><td class="num">{{ m.orders }}</td>
+        <td class="num">{{ m.revenue|money0 }}</td><td class="num">{{ m.avg|money0 }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="center muted" style="padding:1.4rem">لا توجد بيانات في هذه الفترة.</td></tr>{% endfor %}
+    </table>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>المبيعات حسب القسم</h3></div>
+    <table class="data">
+      <thead><tr><th>القسم</th><th>القطع</th><th>الإيراد</th></tr></thead>
+      {% for c in by_category %}
+      <tr><td>{{ c.name|default:"غير مصنّف" }}</td><td class="num">{{ c.units }}</td><td class="num">{{ c.revenue|money0 }}</td></tr>
+      {% empty %}<tr><td colspan="3" class="center muted" style="padding:1.4rem">—</td></tr>{% endfor %}
+    </table>
+  </section>
+</div>
+
+<div class="grid" style="grid-template-columns:1.4fr 1fr;margin-top:1.2rem;align-items:start">
+  <section class="card">
+    <div class="card-head"><h3>أفضل المنتجات ربحاً</h3><a class="small" href="{% url 'dashboard:export_orders' %}">تصدير</a></div>
+    <div class="table-wrap"><table class="data">
+      <thead><tr><th>المنتج</th><th>القطع</th><th>الإيراد</th><th>الربح</th></tr></thead>
+      {% for p in top_products %}
+      <tr><td class="small">{{ p.product_name|truncatechars:38 }}</td><td class="num">{{ p.units }}</td>
+        <td class="num">{{ p.revenue|money0 }}</td><td class="num" style="color:var(--ok)">{{ p.profit|money0 }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="center muted" style="padding:1.4rem">—</td></tr>{% endfor %}
+    </table></div>
+  </section>
+
+  <div class="stack">
+    <section class="card">
+      <div class="card-head"><h3>أفضل العملاء</h3></div>
+      <table class="data">
+        {% for c in top_customers %}
+        <tr><td class="small">{{ c.full_name }}</td><td class="num">{{ c.orders }} طلب</td><td class="num">{{ c.spent|money0 }}</td></tr>
+        {% empty %}<tr><td class="center muted" style="padding:1.2rem">—</td></tr>{% endfor %}
+      </table>
+    </section>
+    <section class="card">
+      <div class="card-head"><h3>حسب المدينة</h3></div>
+      <table class="data">
+        {% for c in by_city %}
+        <tr><td class="small">{{ c.city }}</td><td class="num">{{ c.n }}</td><td class="num">{{ c.t|money0 }}</td></tr>
+        {% empty %}<tr><td class="center muted" style="padding:1.2rem">—</td></tr>{% endfor %}
+      </table>
+    </section>
+  </div>
+</div>
+{% endblock %}

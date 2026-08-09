@@ -1,0 +1,156 @@
+{% extends 'base.html' %}{% load store_extras %}
+{% block title %}{{ product.brand }} {{ product.name }} — {{ STORE_NAME }}{% endblock %}
+{% block meta_description %}{{ product.short_description|default:product.name }}{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <nav class="small muted" style="margin-bottom:1rem">
+    <a href="{% url 'catalog:home' %}">الرئيسية</a> / <a href="{{ product.category.get_absolute_url }}">{{ product.category }}</a> / <span>{{ product.name }}</span>
+  </nav>
+
+  <div class="pdp">
+    <div>
+      <div class="gallery-main">
+        {% if product.main_image %}<img id="mainImg" src="{{ product.main_image }}" alt="{{ product.name }}">
+        {% else %}<i class="bi bi-plug" style="font-size:5rem;color:#c3cbd8"></i>{% endif %}
+      </div>
+      {% if product.images.count > 1 %}
+      <div class="thumbs">
+        {% for im in product.images.all %}
+        <img src="{{ im.image.url }}" alt="{{ im.alt }}" onclick="document.getElementById('mainImg').src=this.src">
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div>
+      <span class="p-brand">{{ product.brand.name }}{% if product.brand.country %} · {{ product.brand.country }}{% endif %}</span>
+      <h1 style="font-size:1.55rem">{{ product.name }}</h1>
+      <div class="row small" style="gap:.8rem">
+        <span class="stars">{{ product.rating|stars }}</span>
+        <span class="muted">{{ reviews.count }} تقييم</span>
+        <span class="muted">رمز المنتج: {{ product.sku }}</span>
+      </div>
+
+      <div class="price-block">
+        <span class="now num">{{ product.price|money }}</span>
+        {% if product.has_discount %}
+          <span class="was num">{{ product.compare_at_price|money0 }}</span>
+          <span class="tag tag-sale">وفّر {{ product.discount_percent }}%</span>
+        {% endif %}
+      </div>
+      <p class="small muted">السعر شامل ضريبة القيمة المضافة{% if product.requires_installation %} · التركيب متاح عند الطلب{% endif %}</p>
+
+      {% if product.short_description %}<p>{{ product.short_description }}</p>{% endif %}
+
+      <div class="row" style="gap:.5rem;margin:.8rem 0">
+        <span class="energy {{ product.energy_rating|energy_class }}">كفاءة {{ product.energy_rating }}</span>
+        {% if product.power_watt %}<span class="badge muted">{{ product.power_watt }} واط</span>{% endif %}
+        <span class="badge muted">{{ product.voltage }}</span>
+        <span class="badge ok">ضمان {{ product.warranty_months }} شهر</span>
+      </div>
+
+      <div class="card card-pad" style="margin:1rem 0">
+        {% if product.in_stock %}
+          <p class="small" style="margin:0 0 .6rem">
+            <span class="badge ok"><i class="bi bi-check-circle"></i> متوفر</span>
+            {% if product.is_low_stock %}<span class="badge warn">بقي {{ product.stock }} فقط</span>{% endif %}
+          </p>
+          <form action="{% url 'orders:cart_add' product.id %}" method="post" class="row" style="gap:.6rem">{% csrf_token %}
+            <div class="qty">
+              <button type="button" onclick="const i=document.getElementById('qty');i.value=Math.max(1,+i.value-1)">−</button>
+              <input id="qty" type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" aria-label="الكمية">
+              <button type="button" onclick="const i=document.getElementById('qty');i.value=Math.min({{ product.stock }},+i.value+1)">+</button>
+            </div>
+            <button class="btn btn-volt grow"><i class="bi bi-bag-plus"></i> أضف إلى السلة</button>
+          </form>
+        {% else %}
+          <p class="badge bad" style="margin:0">نفدت الكمية حالياً</p>
+          <p class="small muted" style="margin:.5rem 0 0">أضفه لقائمة رغباتك وسنراسلك عند توفره.</p>
+        {% endif %}
+        <div class="row" style="gap:.5rem;margin-top:.6rem">
+          <a class="btn btn-ghost btn-sm" href="{% url 'catalog:toggle_wishlist' product.slug %}"><i class="bi bi-heart"></i> قائمة الرغبات</a>
+          <a class="btn btn-ghost btn-sm" href="{% url 'catalog:compare' %}?p={{ product.slug }}"><i class="bi bi-sliders"></i> أضف للمقارنة</a>
+        </div>
+      </div>
+
+      {% if stock_by_warehouse %}
+      <details class="small">
+        <summary class="muted" style="cursor:pointer">التوفر في الفروع</summary>
+        <ul style="margin:.5rem 0">
+          {% for s in stock_by_warehouse %}<li>{{ s.warehouse.name }}{% if s.warehouse.city %} — {{ s.warehouse.city }}{% endif %}: {{ s.available }} قطعة</li>{% endfor %}
+        </ul>
+      </details>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card card-pad" style="margin-top:2rem">
+    <div class="tabs">
+      <button class="active" onclick="showTab(event,'desc')">الوصف</button>
+      <button onclick="showTab(event,'specs')">المواصفات</button>
+      <button onclick="showTab(event,'rev')">التقييمات ({{ reviews.count }})</button>
+    </div>
+
+    <div id="desc">{{ product.description|linebreaks|default:"لم يُضف وصف تفصيلي لهذا الجهاز بعد." }}</div>
+
+    <div id="specs" class="hide">
+      <table class="spec-table">
+        <tr><td>العلامة التجارية</td><td>{{ product.brand }}</td></tr>
+        <tr><td>القسم</td><td>{{ product.category }}</td></tr>
+        <tr><td>رمز المنتج</td><td>{{ product.sku }}</td></tr>
+        {% if product.capacity %}<tr><td>السعة</td><td>{{ product.capacity }}</td></tr>{% endif %}
+        {% if product.power_watt %}<tr><td>القدرة</td><td>{{ product.power_watt }} واط</td></tr>{% endif %}
+        <tr><td>الجهد الكهربائي</td><td>{{ product.voltage }}</td></tr>
+        <tr><td>كفاءة الطاقة</td><td><span class="energy {{ product.energy_rating|energy_class }}">{{ product.energy_rating }}</span></td></tr>
+        {% if product.dimensions %}<tr><td>الأبعاد</td><td>{{ product.dimensions }}</td></tr>{% endif %}
+        {% if product.weight_kg %}<tr><td>الوزن</td><td>{{ product.weight_kg }} كجم</td></tr>{% endif %}
+        <tr><td>الضمان</td><td>{{ product.warranty_months }} شهراً</td></tr>
+        {% for key, value in product.specs.items %}<tr><td>{{ key }}</td><td>{{ value }}</td></tr>{% endfor %}
+      </table>
+    </div>
+
+    <div id="rev" class="hide">
+      {% for r in reviews %}
+      <div style="border-bottom:1px solid var(--line);padding:.8rem 0">
+        <div class="row between">
+          <strong>{{ r.title|default:r.user.display_name }}</strong>
+          <span class="stars">{{ r.rating|stars }}</span>
+        </div>
+        <p class="small" style="margin:.3rem 0">{{ r.body }}</p>
+        <span class="tiny muted">{{ r.user.display_name }} · {{ r.created_at|date:"Y/m/d" }}</span>
+      </div>
+      {% empty %}
+      <p class="muted">لا توجد تقييمات منشورة بعد. كن أول من يشارك تجربته.</p>
+      {% endfor %}
+
+      {% if user.is_authenticated and not has_reviewed %}
+      <form method="post" action="{% url 'catalog:add_review' product.slug %}" style="margin-top:1rem;max-width:520px">{% csrf_token %}
+        <h3>اكتب تقييمك</h3>
+        <div class="field"><label>التقييم</label><div class="row" style="gap:.8rem">{{ review_form.rating }}</div></div>
+        <div class="field"><label>عنوان</label>{{ review_form.title }}</div>
+        <div class="field"><label>رأيك</label>{{ review_form.body }}</div>
+        <button class="btn btn-volt">أرسل التقييم</button>
+      </form>
+      {% elif not user.is_authenticated %}
+      <p class="small"><a href="{% url 'accounts:login' %}">سجّل الدخول</a> لتكتب تقييماً.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if related %}
+  <section class="section">
+    <div class="section-head"><h2>منتجات مشابهة</h2></div>
+    <div class="grid g-4">{% for p in related %}{% include 'partials/product_card.html' %}{% endfor %}</div>
+  </section>
+  {% endif %}
+</div>
+
+<script>
+function showTab(e, id) {
+  ['desc','specs','rev'].forEach(t => document.getElementById(t).classList.add('hide'));
+  document.getElementById(id).classList.remove('hide');
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+}
+</script>
+{% endblock %}

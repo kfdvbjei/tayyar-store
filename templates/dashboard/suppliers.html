@@ -1,0 +1,24 @@
+{% extends 'dashboard/base.html' %}{% load store_extras %}
+{% block title %}الموردون{% endblock %}
+{% block heading %}الموردون{% endblock %}
+{% block actions %}<a class="btn btn-volt btn-sm" href="{% url 'dashboard:supplier_create' %}"><i class="bi bi-plus"></i> مورّد جديد</a>{% endblock %}
+{% block content %}
+<div class="card table-wrap">
+  <table class="data">
+    <thead><tr><th>المورّد</th><th>مسؤول التواصل</th><th>الهاتف</th><th>شروط الدفع</th><th>إجمالي المشتريات</th><th>الحالة</th><th></th></tr></thead>
+    <tbody>
+    {% for s in suppliers %}
+    <tr>
+      <td><strong>{{ s.name }}</strong><div class="tiny muted">{{ s.email }}</div></td>
+      <td class="small">{{ s.contact_person|default:"—" }}</td>
+      <td class="small num">{{ s.phone|default:"—" }}</td>
+      <td class="small">{{ s.payment_terms }}</td>
+      <td class="num nowrap">{{ s.total_purchased|money0 }}</td>
+      <td>{% if s.is_active %}<span class="badge ok">نشط</span>{% else %}<span class="badge muted">موقوف</span>{% endif %}</td>
+      <td><a class="btn btn-ghost btn-sm" href="{% url 'dashboard:supplier_edit' s.pk %}">تعديل</a></td>
+    </tr>
+    {% empty %}<tr><td colspan="7" class="center muted" style="padding:2rem">لا يوجد موردون بعد.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

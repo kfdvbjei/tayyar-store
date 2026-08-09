@@ -1,0 +1,35 @@
+{% extends 'base.html' %}{% load store_extras %}
+{% block title %}تم استلام طلبك {{ order.number }}{% endblock %}
+{% block content %}
+<div class="wrap section" style="max-width:720px">
+  <div class="card card-pad center">
+    <div style="font-size:3rem;color:var(--ok)"><i class="bi bi-check-circle-fill"></i></div>
+    <h1>تم استلام طلبك</h1>
+    <p class="muted">رقم الطلب <strong class="num">{{ order.number }}</strong> — أرسلنا تفاصيله إلى {{ order.email }}.</p>
+    <div class="row" style="justify-content:center;gap:.5rem;margin:1rem 0">
+      <span class="badge {{ order.status|status_class }}">{{ order.get_status_display }}</span>
+      <span class="badge muted">{{ order.get_payment_method_display }}</span>
+      <span class="badge muted num">{{ order.total|money }}</span>
+    </div>
+    {% if order.payment_method == 'cod' %}
+    <p class="small">جهّز مبلغ <strong class="num">{{ order.total|money }}</strong> نقداً أو بالبطاقة عند وصول المندوب.</p>
+    {% elif order.payment_method == 'transfer' %}
+    <p class="small">حوّل المبلغ إلى الآيبان SA00 0000 0000 0000 0000 0000 وأرسل صورة الإشعار على واتساب مع رقم الطلب.</p>
+    {% endif %}
+    <div class="row" style="justify-content:center;gap:.5rem;margin-top:1rem">
+      <a class="btn btn-volt" href="{% url 'orders:invoice' order.number %}">عرض الفاتورة</a>
+      <a class="btn btn-ghost" href="{% url 'catalog:products' %}">متابعة التسوق</a>
+    </div>
+  </div>
+
+  <div class="card card-pad" style="margin-top:1rem">
+    <h3>ما اشتريته</h3>
+    <table class="data">
+      {% for item in order.items.all %}
+      <tr><td>{{ item.product_name }}</td><td>× {{ item.quantity }}</td><td class="num">{{ item.line_total|money0 }}</td></tr>
+      {% endfor %}
+    </table>
+    <p class="small muted" style="margin-top:.8rem">التوصيل إلى: {{ order.address_line }}</p>
+  </div>
+</div>
+{% endblock %}

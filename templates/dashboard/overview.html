@@ -1,0 +1,89 @@
+{% extends 'dashboard/base.html' %}{% load store_extras %}
+{% block title %}نظرة عامة{% endblock %}
+{% block heading %}نظرة عامة{% endblock %}
+{% block subheading %}أداء المتجر اليوم وهذا الشهر{% endblock %}
+{% block actions %}
+<a class="btn btn-ghost btn-sm" href="{% url 'dashboard:export_orders' %}"><i class="bi bi-download"></i> تصدير الطلبات</a>
+<a class="btn btn-volt btn-sm" href="{% url 'dashboard:product_create' %}"><i class="bi bi-plus"></i> منتج جديد</a>
+{% endblock %}
+
+{% block content %}
+<div class="kpis">
+  <div class="kpi"><div class="label">مبيعات اليوم</div><div class="value num">{{ today_sales|money0 }}</div></div>
+  <div class="kpi">
+    <div class="label">مبيعات الشهر</div><div class="value num">{{ month_sales|money0 }}</div>
+    {% if growth is not None %}<div class="delta {% if growth >= 0 %}up{% else %}down{% endif %}">
+      <i class="bi bi-arrow-{% if growth >= 0 %}up{% else %}down{% endif %}"></i> {{ growth }}% عن الشهر الماضي</div>{% endif %}
+  </div>
+  <div class="kpi"><div class="label">مشتريات الشهر</div><div class="value num">{{ purchases_month|money0 }}</div>
+    <div class="delta muted">{{ month_orders }} طلب بيع هذا الشهر</div></div>
+  <div class="kpi"><div class="label">قيمة المخزون</div><div class="value num">{{ stock_value|money0 }}</div>
+    <div class="delta muted">{{ products_count }} منتج معروض</div></div>
+</div>
+
+<div class="grid" style="grid-template-columns:1.6fr 1fr;margin-top:1.2rem;align-items:start">
+  <section class="card">
+    <div class="card-head"><h3>المبيعات مقابل المشتريات — آخر ٣٠ يوماً</h3></div>
+    <div class="card-pad"><canvas id="chart" height="110"></canvas></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>يحتاج إعادة طلب</h3><a class="small" href="{% url 'dashboard:inventory' %}?low=1">الكل</a></div>
+    <table class="data">
+      {% for s in low_stock %}
+      <tr>
+        <td><strong class="small">{{ s.product.name|truncatechars:28 }}</strong><div class="tiny muted">{{ s.warehouse.name }}</div></td>
+        <td class="num">{{ s.quantity }}</td>
+        <td><span class="badge {% if s.quantity == 0 %}bad{% else %}warn{% endif %}">حد {{ s.reorder_level }}</span></td>
+      </tr>
+      {% empty %}<tr><td class="muted small center" style="padding:1.4rem">كل الأرصدة فوق حد إعادة الطلب.</td></tr>{% endfor %}
+    </table>
+  </section>
+</div>
+
+<div class="grid" style="grid-template-columns:1fr 1fr;margin-top:1.2rem;align-items:start">
+  <section class="card">
+    <div class="card-head"><h3>آخر الطلبات</h3><a class="small" href="{% url 'dashboard:orders' %}">الكل</a></div>
+    <div class="table-wrap"><table class="data">
+      <thead><tr><th>الطلب</th><th>العميل</th><th>الحالة</th><th>الإجمالي</th></tr></thead>
+      {% for o in recent_orders %}
+      <tr>
+        <td><a class="num" href="{% url 'dashboard:order_detail' o.number %}">{{ o.number }}</a>
+          <div class="tiny muted">{{ o.created_at|date:"m/d H:i" }}</div></td>
+        <td class="small">{{ o.full_name|truncatechars:18 }}</td>
+        <td><span class="badge {{ o.status|status_class }}">{{ o.get_status_display }}</span></td>
+        <td class="num nowrap">{{ o.total|money0 }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="4" class="muted center" style="padding:1.4rem">لا توجد طلبات بعد.</td></tr>{% endfor %}
+    </table></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>الأكثر مبيعاً</h3></div>
+    <table class="data">
+      <thead><tr><th>المنتج</th><th>القطع</th><th>الإيراد</th></tr></thead>
+      {% for b in best_sellers %}
+      <tr><td class="small">{{ b.product_name|truncatechars:32 }}</td><td class="num">{{ b.units }}</td><td class="num nowrap">{{ b.revenue|money0 }}</td></tr>
+      {% empty %}<tr><td colspan="3" class="muted center" style="padding:1.4rem">لا توجد مبيعات بعد.</td></tr>{% endfor %}
+    </table>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+fetch("{% url 'dashboard:sales_series' %}").then(r => r.json()).then(d => {
+  new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: { labels: d.labels, datasets: [
+      { label: 'المبيعات', data: d.sales, borderColor: '#ffc53d', backgroundColor: 'rgba(255,197,61,.16)', fill: true, tension: .35, borderWidth: 2 },
+      { label: 'المشتريات', data: d.purchases, borderColor: '#17263c', backgroundColor: 'rgba(23,38,60,.06)', fill: true, tension: .35, borderWidth: 2 }
+    ]},
+    options: { responsive: true, plugins: { legend: { labels: { font: { family: 'IBM Plex Sans Arabic' } } } },
+      scales: { y: { beginAtZero: true, ticks: { font: { family: 'IBM Plex Sans Arabic' } } },
+                x: { ticks: { font: { family: 'IBM Plex Sans Arabic' }, maxTicksLimit: 12 } } } }
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}{% load store_extras %}
+{% block title %}طلباتي{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <h1>طلباتي</h1>
+  <div class="card table-wrap">
+    <table class="data">
+      <thead><tr><th>رقم الطلب</th><th>التاريخ</th><th>الأصناف</th><th>الحالة</th><th>الإجمالي</th><th></th></tr></thead>
+      <tbody>
+      {% for o in orders %}
+      <tr>
+        <td class="num">{{ o.number }}</td>
+        <td class="nowrap">{{ o.created_at|date:"Y/m/d" }}</td>
+        <td>{{ o.items.count }} صنف</td>
+        <td><span class="badge {{ o.status|status_class }}">{{ o.get_status_display }}</span></td>
+        <td class="num nowrap">{{ o.total|money0 }}</td>
+        <td><a class="btn btn-ghost btn-sm" href="{% url 'accounts:order_detail' o.number %}">التفاصيل</a></td>
+      </tr>
+      {% empty %}<tr><td colspan="6" class="center muted" style="padding:2rem">لا توجد طلبات. <a href="{% url 'catalog:products' %}">ابدأ التسوق</a></td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

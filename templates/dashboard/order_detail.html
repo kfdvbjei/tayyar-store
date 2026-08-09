@@ -1,0 +1,53 @@
+{% extends 'dashboard/base.html' %}{% load store_extras %}
+{% block title %}الطلب {{ order.number }}{% endblock %}
+{% block heading %}الطلب {{ order.number }}{% endblock %}
+{% block subheading %}{{ order.created_at|date:"Y/m/d H:i" }} · {{ order.get_payment_method_display }}{% endblock %}
+{% block actions %}<a class="btn btn-ghost btn-sm" href="{% url 'orders:invoice' order.number %}"><i class="bi bi-receipt"></i> الفاتورة</a>{% endblock %}
+{% block content %}
+<div class="grid" style="grid-template-columns:1.6fr 1fr;align-items:start">
+  <div class="stack">
+    <section class="card">
+      <div class="card-head"><h3>الأصناف</h3><span class="small muted">الربح المقدّر: <strong class="num">{{ order.profit|money0 }}</strong></span></div>
+      <div class="table-wrap"><table class="data">
+        <thead><tr><th>الصنف</th><th>SKU</th><th>الكمية</th><th>سعر البيع</th><th>التكلفة</th><th>الإجمالي</th></tr></thead>
+        {% for i in order.items.all %}
+        <tr><td>{{ i.product_name }}</td><td class="small">{{ i.sku }}</td><td class="num">{{ i.quantity }}</td>
+          <td class="num">{{ i.unit_price|money0 }}</td><td class="num muted">{{ i.cost_price|money0 }}</td>
+          <td class="num">{{ i.line_total|money0 }}</td></tr>
+        {% endfor %}
+      </table></div>
+      <div class="card-pad">
+        <div class="totals">
+          <div><span>المجموع</span><span class="num">{{ order.subtotal|money }}</span></div>
+          {% if order.discount %}<div><span>الخصم {{ order.coupon_code }}</span><span class="num">− {{ order.discount|money }}</span></div>{% endif %}
+          <div><span>الضريبة</span><span class="num">{{ order.tax|money }}</span></div>
+          <div><span>الشحن</span><span class="num">{{ order.shipping_cost|money }}</span></div>
+          <div class="grand"><span>الإجمالي</span><span class="num">{{ order.total|money }}</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card card-pad">
+      <h3>بيانات العميل</h3>
+      <p class="small">{{ order.full_name }} · {{ order.phone }} · {{ order.email }}<br>
+        {{ order.address_line }}{% if order.notes %}<br><span class="muted">ملاحظات: {{ order.notes }}</span>{% endif %}</p>
+    </section>
+  </div>
+
+  <aside class="card">
+    <div class="card-head"><h3>تحديث الحالة</h3></div>
+    <form method="post" class="card-pad">{% csrf_token %}
+      {% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}
+      <button class="btn btn-volt btn-block">حفظ</button>
+      <p class="tiny muted" style="margin-top:.6rem">
+        تغيير الحالة إلى «مدفوع» أو ما بعدها يخصم الكميات من المخزون تلقائياً، والإلغاء أو الاسترجاع يعيدها.
+      </p>
+    </form>
+    <div class="card-pad" style="border-top:1px solid var(--line)">
+      <h3 style="font-size:.95rem">حالة المخزون</h3>
+      <p class="small">{% if order.stock_released %}<span class="badge ok">خُصمت الكميات</span>{% else %}<span class="badge warn">لم تُخصم بعد</span>{% endif %}
+      {% if order.warehouse %}<br><span class="muted tiny">من {{ order.warehouse }}</span>{% endif %}</p>
+    </div>
+  </aside>
+</div>
+{% endblock %}
