@@ -1,12 +1,24 @@
 """إعدادات مشروع «تيّار» — متجر الأجهزة الكهربائية."""
 from pathlib import Path
 from decouple import config, Csv
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="dev-only-insecure-key")
 DEBUG = config("DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=Csv())
+
+# ✅ إعدادات Vercel
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS", 
+    default="127.0.0.1,localhost,.vercel.app", 
+    cast=Csv()
+)
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS", 
+    default="https://*.vercel.app", 
+    cast=Csv()
+)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -17,12 +29,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # التطبيقات المخصصة
-    'apps.accounts',        # ✅ صح
-    'apps.catalog',         # ✅ صح
-    'apps.inventory',       # ✅ صح
-    'apps.purchasing',      # ✅ صح
-    'apps.orders',          # ✅ صح
-    'apps.dashboard',       # ✅ لو موجود
+    'apps.accounts',
+    'apps.catalog',
+    'apps.inventory',
+    'apps.purchasing',
+    'apps.orders',
+    'apps.dashboard',
 ]
 
 MIDDLEWARE = [
@@ -59,16 +71,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# ✅ قاعدة البيانات - دعم DATABASE_URL من Vercel
+import dj_database_url
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME", default="tayyar_db"),
-        "USER": config("DB_USER", default="postgres"),
-        "PASSWORD": config("DB_PASSWORD", default=""),
-        "HOST": config("DB_HOST", default="127.0.0.1"),
-        "PORT": config("DB_PORT", default="5432"),
-        "CONN_MAX_AGE": 60,
-    }
+    "default": dj_database_url.config(
+        default=config(
+            "DATABASE_URL",
+            default=f"postgresql://{config('DB_USER', default='postgres')}:"
+                    f"{config('DB_PASSWORD', default='')}@"
+                    f"{config('DB_HOST', default='127.0.0.1')}:"
+                    f"{config('DB_PORT', default='5432')}/"
+                    f"{config('DB_NAME', default='tayyar_db')}"
+        ),
+        conn_max_age=60,
+    )
 }
 
 AUTH_USER_MODEL = "accounts.User"
@@ -83,17 +100,20 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "ar"
-TIME_ZONE = config("TIME_ZONE", default="Asia/Riyadh")
+TIME_ZONE = config("TIME_ZONE", default="Africa/Cairo")
 USE_I18N = True
 USE_TZ = True
 
+# ✅ إعدادات الملفات الثابتة لـ Vercel
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -133,7 +153,6 @@ else:
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="no-reply@tayyar.sa")
 
 # ── الأمان في الإنتاج ──────────────────────────────────────────
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
